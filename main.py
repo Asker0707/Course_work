@@ -1,127 +1,42 @@
-import requests
 import os
 import json
-
-token = ''
-
-def main(): 
-
-    class VkDownloader:
-
-        def __init__(self, token):
-            self.token = token
-
-        def get_photos(self, offset=0, count=50):
-
-            url = 'https://api.vk.com/method/photos.get'
-            params = {'owner_id': user_id,
-                      'album_id': 'profile',
-                      'access_token': token,
-                      'v': '5.131',
-                      'extended': '1',
-                      'photo_sizes': '1',
-                      'count': count,
-                      'offset': offset
-                      }
-            res = requests.get(url=url, params=params)
-            return res.json()
-
-        def get_all_photos(self):
-            data = self.get_photos()
-            all_photo_count = data['response']['count']
-            i = 0
-            count = 50
-            photos = []
-            max_size_photo = {}
+import VkDownloader
+import yadisk
 
 
-            if not os.path.exists('images_vk'):
-                os.mkdir('images_vk')
+vk_token = 'vk1.a.9WKlCdKB4SyHsvZVWFJJQBjr7g7yiRR6H6dX7ahToF0ie-V1pOLvptCZGtRrl2wESwywtqqPa6jljay47Zu0y9jveoCJ2L9ZDQgtI-sLMr98MOaxjiOnAcUN7pz6IllQ7lbgVlysfe4b5IMSZUl2kW-Ban-lo65ZTl2yoD_NfHLUlWm7GgO5h4D5xAcdTGk5yx-hI9cYSUAI8Z2X8i6JBg'
+ya_token = 'y0_AgAAAAAe8BS-AADLWwAAAADimc0xjUliX3ljTB-FlWyvZkC1a9K9ZWw'
 
-            while i <= all_photo_count:
-                if i != 0:
-                    data = self.get_photos(offset=i, count=count)
+y = yadisk.YaDisk(token=ya_token)
+downloader = VkDownloader.VkDownload(vk_token)
+downloader.get_all_photos()
 
+data = downloader.get_photos()
+def get_json(data):
+    max_size_photo = {}
+    photos = []
+    for photo in data['response']['items']:
+        max_size = 0
+        photos_info = {}
+        
+        for size in photo['sizes']:
+            if size['height'] >= max_size:
+                max_size = size['height']
+        if photo['likes']['count'] in max_size_photo:
+            photos_info['file_name'] = f"{photo['likes']['count']}+{photo['date']}.jpg"
+        else:
+            photos_info['file_name'] = f"{photo['likes']['count']}.jpg"
+        photos_info['size'] = size['type']
+        photos.append(photos_info)
 
-                for photo in data['response']['items']:
-                    max_size = 0
-                    photos_info = {}
+    with open("photos.json", "w") as file:
+        json.dump(photos, file, indent=4)
 
-                    for size in photo['sizes']:
-                        if size['height'] >= max_size:
-                            max_size = size['height']
-                    if photo['likes']['count'] in max_size_photo:
-                        max_size_photo[f"{photo['likes']['count']} + {photo['date']}"] = size['url']
-                        photos_info['file_name'] = f"{photo['likes']['count']}+{photo['date']}.jpg"
+get_json(data)
 
-
-
-                    else:
-                        max_size_photo[photo['likes']['count']] = size['url']
-                        photos_info['file_name'] = f"{photo['likes']['count']}.jpg"
-                    photos_info['size'] = size['type']
-                    photos.append(photos_info)
-
-
-                for photo_name, photo_url in max_size_photo.items():
-                    with open(f'images_vk/{photo_name}.jpg', 'wb') as file:
-                        img = requests.get(photo_url)
-                        file.write(img.content)
-
-                print(f'Загружено {len(max_size_photo)} фото')
-                i += count
-
-
-            with open("photos.json", "w") as file:
-                json.dump(photos, file, indent=4)
-
-
-
-
-    class YaUploader:
-        def __init__(self, token: str):
-            self.token = token
-
-        def folder_creation(self):
-            url = 'https://cloud-api.yandex.net/v1/disk/resources/'
-            headers = {'Content-Type': 'application/json',
-                       'Authorization': f'OAuth {ya_token}'}
-            params = {'path': f'{folder_name}',
-                      'overwrite': 'false'}
-            response = requests.put(url=url, headers=headers, params=params)
-
-        def upload(self, file_path: str):
-            url = 'https://cloud-api.yandex.net/v1/disk/resources/upload'
-            headers = {'Content-Type': 'application/json',
-                       'Authorization': f'OAuth {ya_token}'}
-            params = {'path': f'{folder_name}/{file_name}',
-                      'overwrite': 'true'}
-
-
-            response = requests.get(url=url, headers=headers, params=params)
-            href = response.json().get('href')
-
-
-            uploader = requests.put(href, data=open(files_path, 'rb'))
-
-
-    user_id = str(input('Введите id пользователя VK: '))
-    downloader = VkDownloader(token)
-    downloader.get_all_photos()
-
-    ya_token = str(input('Введите ваш токен ЯндексДиск: '))
-    uploader = YaUploader(ya_token)
-    folder_name = str(input('Введите имя папки на Яндекс диске, в которую необходимо сохранить фото: '))
-    uploader.folder_creation()
-
-    photos_list = os.listdir('images_vk')
-    for count, photo in enumerate(photos_list, start=1):
-        file_name = photo
-        files_path = os.getcwd() + '\images_vk\\' + photo
-        result = uploader.upload(files_path)
-        print(f'Фотографий загружено на Яндекс диск: {count}')
-
-
-if __name__ == '__main__':
-    main()
-    
+photos_list = os.listdir('images_vk')
+if not y.exists('photo'):
+    y.mkdir('photo')
+for count, photo_name in enumerate(photos_list, start=1):
+    y.upload(f'images_vk/{photo_name}', '/photo/'f'{photo_name}')
+    print(f'Загружено фото: {count}')
