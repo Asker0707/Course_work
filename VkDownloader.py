@@ -3,7 +3,7 @@ import requests
 
 NAME = 'VkDownloader'
 
-vk_token = 'vk1.a.9WKlCdKB4SyHsvZVWFJJQBjr7g7yiRR6H6dX7ahToF0ie-V1pOLvptCZGtRrl2wESwywtqqPa6jljay47Zu0y9jveoCJ2L9ZDQgtI-sLMr98MOaxjiOnAcUN7pz6IllQ7lbgVlysfe4b5IMSZUl2kW-Ban-lo65ZTl2yoD_NfHLUlWm7GgO5h4D5xAcdTGk5yx-hI9cYSUAI8Z2X8i6JBg'
+vk_token = ''
 user_id = str(input('Введите id пользователя VK: '))
 
 class VkDownload:

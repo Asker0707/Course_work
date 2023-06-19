@@ -4,13 +4,14 @@ import VkDownloader
 import yadisk
 
 
-vk_token = 'vk1.a.9WKlCdKB4SyHsvZVWFJJQBjr7g7yiRR6H6dX7ahToF0ie-V1pOLvptCZGtRrl2wESwywtqqPa6jljay47Zu0y9jveoCJ2L9ZDQgtI-sLMr98MOaxjiOnAcUN7pz6IllQ7lbgVlysfe4b5IMSZUl2kW-Ban-lo65ZTl2yoD_NfHLUlWm7GgO5h4D5xAcdTGk5yx-hI9cYSUAI8Z2X8i6JBg'
-ya_token = 'y0_AgAAAAAe8BS-AADLWwAAAADimc0xjUliX3ljTB-FlWyvZkC1a9K9ZWw'
+vk_token = ''
+ya_token = ''
 
 y = yadisk.YaDisk(token=ya_token)
 downloader = VkDownloader.VkDownload(vk_token)
 downloader.get_all_photos()
 
+#Получаю json файл и сохраяню его
 data = downloader.get_photos()
 def get_json(data):
     max_size_photo = {}
@@ -35,6 +36,8 @@ def get_json(data):
 get_json(data)
 
 photos_list = os.listdir('images_vk')
+
+# Создаю на яндекс диске папку и загружаю туда фото
 if not y.exists('photo'):
     y.mkdir('photo')
 for count, photo_name in enumerate(photos_list, start=1):
